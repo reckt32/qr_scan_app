@@ -28,8 +28,8 @@ class _QRViewExampleState extends State<QRViewExample> {
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
-  // In order to get hot reload to work we need to pause the camera if the platform
-  // is android, or resume the camera if the platform is iOS.
+  // Called when the state is reassembled (e.g., during a hot reload).
+  // Pause the camera on Android and resume on iOS to handle camera resources properly.
   @override
   void reassemble() {
     super.reassemble();
@@ -47,48 +47,56 @@ class _QRViewExampleState extends State<QRViewExample> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
+            // Display an image at the top
             Image.asset('images/Ebene 1.png'),
+            // QR code scanner view with a custom border
             CustomPaint(
               foregroundPainter: BorderPainter(),
               child: Container(
                 clipBehavior: Clip.hardEdge,
-  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(15.0),),
-                height: MediaQuery.of(context).size.height*0.35, width: MediaQuery.of(context).size.width*0.8 ,child: _buildQrView(context)),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                height: MediaQuery.of(context).size.height * 0.35,
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: _buildQrView(context),
+              ),
             ),
+            // Instruction text
             Container(
               alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width*0.8,
+              width: MediaQuery.of(context).size.width * 0.8,
               child: const Text(
-              style: TextStyle(
-                fontSize: 30.0,
-                fontWeight: FontWeight.bold,
+                'Scannen Sie den QR-Code',
+                style: TextStyle(
+                  fontSize: 30.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              'Scannen Sie den QR-Code')),
-
+            ),
+            // Additional instructions text
             Container(
               alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width*0.8,
+              width: MediaQuery.of(context).size.width * 0.8,
               child: const Text(
+                'Scannen Sie den QR-Code auf der Unterseite des Gateways, um die Installation fortzusetzen',
                 textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontStyle: FontStyle.italic,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
-              
-              'Scannen Sie den QR-Code auf der Unterseite des Gateways, um die Installation fortzusetzen')),
-            
+            ),
+            // Display scanned result if available
             if (result != null)
-                Text(
-                    'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-              
-            
+              Text('Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
           ],
         ),
       ),
     );
   }
 
+  // Build the QR view with the scanner
   Widget _buildQrView(BuildContext context) {
     return QRView(
       key: qrKey,
@@ -97,6 +105,7 @@ class _QRViewExampleState extends State<QRViewExample> {
     );
   }
 
+  // Called when the QR view is created
   void _onQRViewCreated(QRViewController controller) {
     setState(() {
       this.controller = controller;
@@ -108,15 +117,17 @@ class _QRViewExampleState extends State<QRViewExample> {
     });
   }
 
+  // Handle permission set for the QR view
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
     if (!p) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
+        const SnackBar(content: Text('No Permission')),
       );
     }
   }
 
+  // Dispose of the controller when the state is disposed
   @override
   void dispose() {
     controller?.dispose();
@@ -124,12 +135,13 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 }
 
+// Custom painter for the border around the QR view
 class BorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    double sh = size.height; // for convenient shortage
-    double sw = size.width; // for convenient shortage
-    double cornerSide = sh * 0.1; // desirable value for corners side
+    double sh = size.height; // height of the view
+    double sw = size.width; // width of the view
+    double cornerSide = sh * 0.1; // size of the corners
 
     Paint paint = Paint()
       ..color = Colors.black
